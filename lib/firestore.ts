@@ -43,40 +43,23 @@ export interface Movie {
   genres: string[]; // Etiketler için
 }
 
-export interface WatchParty {
-  id?: string;
-  partyId: string;
-  movieId: string;
-  hostId: string;
-  participants: string[];
-  createdAt: Date;
-  messages: WatchPartyMessage[];
-  isActive: boolean;
-}
 
-export interface WatchPartyMessage {
-  id: string;
-  userId: string;
-  userName: string;
-  message: string;
-  timestamp: Date;
-}
 // Kullanıcı verilerini al
 export async function getUserData(userId: string): Promise<UserData | null> {
   try {
     const userDocRef = doc(db, 'users', userId);
     const userDoc = await getDoc(userDocRef);
-    
+
     if (userDoc.exists()) {
       return userDoc.data() as UserData;
     }
     return null;
   } catch (error) {
-    console.error('Kullanıcı verileri alınırken hata:', error);
     if (error instanceof Error && error.message.includes('permission')) {
-      console.warn('Firestore izin hatası - kullanıcı verisi oluşturuluyor');
+      console.debug('Kullanıcı verisi henüz yok veya SDK yetkisi bekleniyor (izin hatası).');
       return null;
     }
+    console.warn('Kullanıcı verileri alınırken hata:', error);
     return null;
   }
 }
@@ -86,7 +69,7 @@ export async function createOrUpdateUser(userData: Partial<UserData>): Promise<v
   try {
     const userDocRef = doc(db, 'users', userData.userId!);
     const existingUser = await getDoc(userDocRef);
-    
+
     if (existingUser.exists()) {
       await updateDoc(userDocRef, {
         ...userData,
@@ -119,7 +102,7 @@ export async function toggleFavorite(userId: string, imdbId: string): Promise<vo
   try {
     const userDocRef = doc(db, 'users', userId);
     const userData = await getUserData(userId);
-    
+
     if (userData?.favoriteItems.includes(imdbId)) {
       await updateDoc(userDocRef, {
         favoriteItems: arrayRemove(imdbId)
@@ -140,7 +123,7 @@ export async function toggleWatched(userId: string, imdbId: string): Promise<voi
   try {
     const userDocRef = doc(db, 'users', userId);
     const userData = await getUserData(userId);
-    
+
     if (userData?.watchedItems.includes(imdbId)) {
       await updateDoc(userDocRef, {
         watchedItems: arrayRemove(imdbId)
@@ -161,7 +144,7 @@ export async function toggleWatchLater(userId: string, imdbId: string): Promise<
   try {
     const userDocRef = doc(db, 'users', userId);
     const userData = await getUserData(userId);
-    
+
     if (userData?.watchLaterItems?.includes(imdbId)) {
       await updateDoc(userDocRef, {
         watchLaterItems: arrayRemove(imdbId)
@@ -208,13 +191,13 @@ export async function getReviews(imdbId: string): Promise<Review[]> {
   try {
     const reviewsCollection = collection(db, 'reviews');
     const q = query(reviewsCollection, where('imdbId', '==', imdbId));
-    
+
     const querySnapshot = await getDocs(q);
     const reviews = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as Review[];
-    
+
     return reviews.sort((a, b) => {
       const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
       const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt);
@@ -244,7 +227,7 @@ export async function updateUserProfile(userId: string, data: Partial<UserData>)
 export function formatDate(date: any): string {
   try {
     let dateObj: Date;
-    
+
     if (date instanceof Date) {
       dateObj = date;
     } else if (date && typeof date === 'object' && date.seconds) {
@@ -255,11 +238,11 @@ export function formatDate(date: any): string {
     } else {
       return 'Geçersiz tarih';
     }
-    
+
     if (isNaN(dateObj.getTime())) {
       return 'Geçersiz tarih';
     }
-    
+
     return dateObj.toLocaleDateString('tr-TR', {
       year: 'numeric',
       month: 'long',
@@ -277,13 +260,13 @@ export async function getUserReviews(userId: string): Promise<Review[]> {
   try {
     const reviewsCollection = collection(db, 'reviews');
     const q = query(reviewsCollection, where('userId', '==', userId));
-    
+
     const querySnapshot = await getDocs(q);
     const reviews = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as Review[];
-    
+
     return reviews.sort((a, b) => {
       const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
       const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt);
@@ -300,13 +283,13 @@ export async function getAllUsers(): Promise<UserData[]> {
   try {
     const usersCollection = collection(db, 'users');
     const q = query(usersCollection, orderBy('createdAt', 'desc'));
-    
+
     const querySnapshot = await getDocs(q);
     const users = querySnapshot.docs.map(doc => ({
       userId: doc.id,
       ...doc.data()
     })) as UserData[];
-    
+
     return users;
   } catch (error) {
     console.error('Kullanıcılar alınırken hata:', error);
@@ -369,13 +352,13 @@ export async function getAllMovies(): Promise<Movie[]> {
   try {
     const moviesCollection = collection(db, 'movies');
     const q = query(moviesCollection, orderBy('createdAt', 'desc'));
-    
+
     const querySnapshot = await getDocs(q);
     const movies = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as Movie[];
-    
+
     return movies;
   } catch (error) {
     console.error('Filmler alınırken hata:', error);
@@ -406,76 +389,26 @@ export async function deleteMovie(movieId: string): Promise<void> {
   }
 }
 
-// Watch Party işlemleri
-export async function createWatchParty(party: Omit<WatchParty, 'id' | 'createdAt' | 'messages'>): Promise<string> {
-  try {
-    const partiesCollection = collection(db, 'watchparties');
-    const docRef = await addDoc(partiesCollection, {
-      ...party,
-      messages: [],
-      createdAt: new Date()
-    });
-    return docRef.id;
-  } catch (error) {
-    console.error('Watch Party oluşturulurken hata:', error);
-    throw error;
-  }
-}
 
-export async function joinWatchParty(partyId: string, userId: string): Promise<void> {
-  try {
-    const partyDocRef = doc(db, 'watchparties', partyId);
-    await updateDoc(partyDocRef, {
-      participants: arrayUnion(userId)
-    });
-  } catch (error) {
-    console.error('Watch Party\'ye katılırken hata:', error);
-    throw error;
-  }
-}
-
-export async function leaveWatchParty(partyId: string, userId: string): Promise<void> {
-  try {
-    const partyDocRef = doc(db, 'watchparties', partyId);
-    await updateDoc(partyDocRef, {
-      participants: arrayRemove(userId)
-    });
-  } catch (error) {
-    console.error('Watch Party\'den ayrılırken hata:', error);
-    throw error;
-  }
-}
-
-export async function addWatchPartyMessage(partyId: string, message: WatchPartyMessage): Promise<void> {
-  try {
-    const partyDocRef = doc(db, 'watchparties', partyId);
-    await updateDoc(partyDocRef, {
-      messages: arrayUnion(message)
-    });
-  } catch (error) {
-    console.error('Watch Party mesajı eklenirken hata:', error);
-    throw error;
-  }
-}
 // İstatistikler
 export async function getStats() {
   try {
     const usersCollection = collection(db, 'users');
     const reviewsCollection = collection(db, 'reviews');
     const moviesCollection = collection(db, 'movies');
-    
+
     const [usersSnapshot, reviewsSnapshot, moviesSnapshot] = await Promise.all([
       getDocs(usersCollection),
       getDocs(reviewsCollection),
       getDocs(moviesCollection)
     ]);
-    
+
     const users = usersSnapshot.docs.map(doc => doc.data() as UserData);
     const totalUsers = users.length;
     const activeUsers = users.filter(user => user.status === 'active').length;
     const pendingUsers = users.filter(user => user.role === 'pending').length;
     const adminUsers = users.filter(user => user.role === 'admin').length;
-    
+
     return {
       totalUsers,
       activeUsers,

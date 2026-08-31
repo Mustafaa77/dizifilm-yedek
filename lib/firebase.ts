@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 
 // Firebase yapılandırması - .env.local'dan çevresel değişkenlerle (trim ile boşlukları temizle)
@@ -27,19 +27,14 @@ const app = initializeApp(firebaseConfig);
 // Auth servisini başlat
 export const auth = getAuth(app);
 
-// Firestore servisini başlat
-export const db = getFirestore(app);
-
-// Offline desteği etkinleştir (sadece client tarafında)
-if (typeof window !== 'undefined') {
-  enableIndexedDbPersistence(db).catch((err) => {
-    console.error("Firestore offline persistence error:", err.code);
-  });
-}
+// Firestore servisini başlat ve Offline desteğini yeni yöntemle (v10+) etkinleştir
+export const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+});
 
 // Analytics sadece client-side'da ve production'da çalışır
-export const analytics = typeof window !== 'undefined' && process.env.NODE_ENV === 'production' 
-  ? getAnalytics(app) 
+export const analytics = typeof window !== 'undefined' && process.env.NODE_ENV === 'production'
+  ? getAnalytics(app)
   : null;
 
 export default app;

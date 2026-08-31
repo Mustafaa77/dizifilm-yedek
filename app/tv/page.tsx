@@ -35,7 +35,7 @@ function TVShowDetailContent() {
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showTrailer, setShowTrailer] = useState(false);
-  
+
   const [newReview, setNewReview] = useState({
     rating: '',
     comment: '',
@@ -67,16 +67,16 @@ function TVShowDetailContent() {
         setLoading(false);
         return;
       }
-      
+
       setLoading(true);
       setError('');
-      
+
       try {
         const [tvData, videosData] = await Promise.all([
           fetchTVById(parseInt(tvId)),
           fetchTVVideos(parseInt(tvId))
         ]);
-        
+
         if (tvData) {
           setTVShow(tvData);
           setVideos(videosData);
@@ -100,7 +100,7 @@ function TVShowDetailContent() {
       toast.error('Favorilere eklemek için giriş yapın');
       return;
     }
-    
+
     setActionLoading(true);
     try {
       await toggleFavorite(user.uid, tvId);
@@ -119,7 +119,7 @@ function TVShowDetailContent() {
       toast.error('İzleme listesine eklemek için giriş yapın');
       return;
     }
-    
+
     setActionLoading(true);
     try {
       await toggleWatched(user.uid, tvId);
@@ -138,7 +138,7 @@ function TVShowDetailContent() {
       toast.error('İzlenecek listesine eklemek için giriş yapın');
       return;
     }
-    
+
     setActionLoading(true);
     try {
       await toggleWatchLater(user.uid, tvId);
@@ -157,14 +157,14 @@ function TVShowDetailContent() {
       toast.error('Yorum yapmak için giriş yapın');
       return;
     }
-    
+
     if (!newReview.rating || !newReview.comment.trim()) {
       toast.error('Lütfen puan ve yorum alanlarını doldurun');
       return;
     }
-    
+
     setReviewLoading(true);
-    
+
     try {
       await addReview({
         imdbId: tvId,
@@ -175,7 +175,7 @@ function TVShowDetailContent() {
         spoiler: !!newReview.spoiler,
         movieTitle: tvShow?.name || '',
       });
-      
+
       await loadReviews();
       setNewReview({ rating: '', comment: '', spoiler: false });
       toast.success('Yorumunuz başarıyla eklendi');
@@ -189,7 +189,7 @@ function TVShowDetailContent() {
 
   const handleDeleteReview = async (reviewId: string) => {
     if (!user) return;
-    
+
     try {
       await deleteReview(reviewId);
       await loadReviews();
@@ -236,8 +236,8 @@ function TVShowDetailContent() {
   if (error || !tvShow) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           onClick={handleGoBack}
           className="mb-6"
         >
@@ -251,23 +251,23 @@ function TVShowDetailContent() {
     );
   }
 
-  const averageRating = reviews.length > 0 
-    ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length 
+  const averageRating = reviews.length > 0
+    ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
     : 0;
 
   const posterUrl = getPosterUrl(tvShow.poster_path);
   const backdropUrl = getBackdropUrl(tvShow.backdrop_path);
   const trailerUrl = getYouTubeTrailerUrl(videos);
   const releaseYear = tvShow.first_air_date ? new Date(tvShow.first_air_date).getFullYear() : '';
-  const episodeRuntime = tvShow.episode_run_time && tvShow.episode_run_time.length > 0 
-    ? `${tvShow.episode_run_time[0]} dakika/bölüm` 
+  const episodeRuntime = tvShow.episode_run_time && tvShow.episode_run_time.length > 0
+    ? `${tvShow.episode_run_time[0]} dakika/bölüm`
     : '';
 
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Geri Dön Butonu */}
-      <Button 
-        variant="outline" 
+      <Button
+        variant="outline"
         onClick={handleGoBack}
         className="mb-6"
       >
@@ -289,7 +289,7 @@ function TVShowDetailContent() {
                 priority
               />
             </div>
-            
+
             {/* Quick Actions */}
             <div className="p-4 space-y-3">
               <div className="grid grid-cols-1 gap-2">
@@ -310,7 +310,7 @@ function TVShowDetailContent() {
                   <Heart className={cn("h-4 w-4 mr-2", isFavorite && "fill-current")} />
                   {isFavorite ? 'Favorilerden Çıkar' : 'Favorilere Ekle'}
                 </Button>
-                
+
                 <Button
                   variant={isWatched ? "default" : "outline"}
                   onClick={handleWatched}
@@ -351,16 +351,16 @@ function TVShowDetailContent() {
                   Watch Party
                 </Button>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-2">
                 <Button variant="outline" size="sm" className="w-full h-8" onClick={handleShare}>
                   <Share2 className="h-3 w-3 mr-1" />
                   <span className="text-xs">Paylaş</span>
                 </Button>
                 <Button variant="outline" size="sm" className="w-full h-8" asChild>
-                  <a 
-                    href={`https://www.themoviedb.org/tv/${tvShow.id}`} 
-                    target="_blank" 
+                  <a
+                    href={`https://www.themoviedb.org/tv/${tvShow.id}`}
+                    target="_blank"
                     rel="noopener noreferrer"
                   >
                     <ExternalLink className="h-3 w-3 mr-1" />
@@ -379,16 +379,16 @@ function TVShowDetailContent() {
             <div className="flex items-start justify-between mb-4">
               <h1 className="text-2xl lg:text-4xl font-bold leading-tight">{tvShow.name}</h1>
             </div>
-            
+
             <div className="mb-4">
-              <EpisodeSelector 
-                tvId={parseInt(tvId)} 
-                seasons={tvShow.seasons || []} 
+              <EpisodeSelector
+                tvId={parseInt(tvId)}
+                seasons={tvShow.seasons || []}
                 onEpisodeSelect={(seasonNum, episodeNum) => {
                   const { buildTVWatchUrl } = require('@/lib/utils');
                   const watchUrl = buildTVWatchUrl(tvId, seasonNum, episodeNum);
                   // Convert watch URL if necessary, but buildTVWatchUrl should handle it
-                  router.push(watchUrl.replace('/tv/', '/tv/watch?id=').replace('/watch', '')); 
+                  router.push(watchUrl.replace('/tv/', '/tv/watch?id=').replace('/watch', ''));
                   // Wait, let's fix buildTVWatchUrl later. For now, manual:
                   router.push(`/tv/watch?id=${tvId}&season=${seasonNum}&episode=${episodeNum}`);
                 }}
@@ -397,16 +397,16 @@ function TVShowDetailContent() {
 
             {/* İzle Butonu ve Watch Party */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="h-16 rounded-2xl text-xl font-bold bg-gradient-to-r from-primary to-blue-600 shadow-xl shadow-primary/20 hover:scale-[1.01] transition-all"
                 onClick={() => router.push(`/tv/watch?id=${tvId}`)}
               >
                 <Play className="h-6 w-6 mr-3 fill-current" />
                 Hemen İzle
               </Button>
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 variant="outline"
                 className="h-16 rounded-2xl text-xl font-bold border-2 border-primary/20 hover:bg-primary/5 hover:border-primary/40 transition-all group"
                 onClick={() => {
@@ -418,27 +418,27 @@ function TVShowDetailContent() {
                 Birlikte İzle
               </Button>
             </div>
-            
+
             <div className="flex flex-wrap items-center gap-4 mb-4">
               <Badge variant="secondary" className="text-sm flex items-center gap-1">
                 <Tv className="h-3 w-3" />
                 Dizi
               </Badge>
-              
+
               {releaseYear && (
                 <div className="flex items-center space-x-1 text-muted-foreground">
                   <Calendar className="h-4 w-4" />
                   <span>{releaseYear}</span>
                 </div>
               )}
-              
+
               {episodeRuntime && (
                 <div className="flex items-center space-x-1 text-muted-foreground">
                   <Clock className="h-4 w-4" />
                   <span>{episodeRuntime}</span>
                 </div>
               )}
-              
+
               {tvShow.vote_average > 0 && (
                 <div className="flex items-center space-x-1">
                   <Star className="h-4 w-4 text-yellow-500 fill-current" />
@@ -446,7 +446,7 @@ function TVShowDetailContent() {
                   <span className="text-muted-foreground">TMDB</span>
                 </div>
               )}
-              
+
               {averageRating > 0 && (
                 <div className="flex items-center space-x-1">
                   <Star className="h-4 w-4 text-blue-500 fill-current" />
@@ -522,7 +522,7 @@ function TVShowDetailContent() {
                     </p>
                   </div>
                 )}
-                
+
                 {tvShow.production_companies && tvShow.production_companies.length > 0 && (
                   <div>
                     <h4 className="font-semibold mb-1 flex items-center gap-2">
@@ -533,7 +533,7 @@ function TVShowDetailContent() {
                     </p>
                   </div>
                 )}
-                
+
                 {tvShow.production_countries && tvShow.production_countries.length > 0 && (
                   <div>
                     <h4 className="font-semibold mb-1 flex items-center gap-2">
@@ -566,7 +566,7 @@ function TVShowDetailContent() {
                     </p>
                   </div>
                 )}
-                
+
                 <div>
                   <h4 className="font-semibold mb-1 flex items-center gap-2">
                     📊 Sezon Sayısı
@@ -580,7 +580,7 @@ function TVShowDetailContent() {
                   </h4>
                   <p className="text-muted-foreground">{tvShow.number_of_episodes}</p>
                 </div>
-                
+
                 {tvShow.status && (
                   <div>
                     <h4 className="font-semibold mb-1 flex items-center gap-2">
@@ -621,7 +621,7 @@ function TVShowDetailContent() {
                     <div className="text-xs text-muted-foreground">10 üzerinden ({tvShow.vote_count.toLocaleString()} oy)</div>
                   </div>
                 )}
-                
+
                 {averageRating > 0 && (
                   <div className="text-center p-6 bg-blue-500/10 rounded-lg border border-blue-500/20">
                     <div className="text-3xl font-bold text-blue-600 mb-2">{averageRating.toFixed(1)}</div>
@@ -722,7 +722,7 @@ function TVShowDetailContent() {
                   <Checkbox id="review-spoiler" checked={newReview.spoiler} onCheckedChange={(v) => setNewReview({ ...newReview, spoiler: !!v })} />
                   <Label htmlFor="review-spoiler">Spoiler içeriyor</Label>
                 </div>
-                <Button 
+                <Button
                   onClick={handleSubmitReview}
                   disabled={reviewLoading || !newReview.rating || !newReview.comment.trim()}
                 >
@@ -786,7 +786,7 @@ function TVShowDetailContent() {
                           }
                         }}
                       >
-                        {review.spoiler && !revealed[review.id! ] && (
+                        {review.spoiler && !revealed[review.id!] && (
                           <div
                             className="absolute inset-0 flex items-center justify-center bg-black/60 text-white text-sm font-medium rounded-md cursor-pointer"
                             onClick={() => setRevealed((r) => ({ ...r, [review.id!]: true }))}
@@ -794,7 +794,7 @@ function TVShowDetailContent() {
                             Spoiler! Görmek için tıkla
                           </div>
                         )}
-                        <div className={`${review.spoiler && !revealed[review.id! ] ? 'blur-md select-none' : ''}`}>
+                        <div className={`${review.spoiler && !revealed[review.id!] ? 'blur-md select-none' : ''}`}>
                           <p className="text-muted-foreground leading-relaxed">{review.comment}</p>
                         </div>
                       </div>

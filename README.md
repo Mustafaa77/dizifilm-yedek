@@ -1,4 +1,4 @@
-# DiziFilm (CineMax)
+# DiziFilm (NOXEN)
 
 Modern Next.js 14 (App Router) ile geliştirilmiş film/dizi keşif, izleme listesi ve yorum platformu. Firebase Authentication + Firestore kullanır; e-posta/şifre ile kayıt, yorumlar, favoriler ve admin paneli ile içerik/yönetim özellikleri içerir.
 
@@ -49,7 +49,7 @@ Bu değerler `lib/firebase.ts` içinde kullanılır.
 - `SMTP_PORT` (Ör: `587`)
 - `SMTP_USER`
 - `SMTP_PASS`
-- `SMTP_FROM` (Ör: `"CineMax <you@example.com>"`)
+- `SMTP_FROM` (Ör: `"NOXEN <you@example.com>"`)
 
 Geliştirme sırasında testi kolaylaştırmak için:
 - `NEXT_PUBLIC_SHOW_DEV_OTP=true` (Geliştirme modunda OTP kodu API yanıtında ve opsiyonel olarak UI’da görünür.)

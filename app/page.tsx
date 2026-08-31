@@ -158,29 +158,29 @@ export default function Home() {
                 ✨ Yeni Nesil Sinema Deneyimi
               </Badge>
               <h1 className="text-6xl font-extrabold tracking-tight sm:text-7xl md:text-8xl">
-                <span className="text-gradient">CineMax</span>
+                <span className="text-gradient">NOXEN</span>
                 <span className="block text-2xl md:text-3xl font-medium text-muted-foreground mt-4">
                   Sınır Tanımayan Eğlence Dünyası
                 </span>
               </h1>
               <p className="mx-auto max-w-2xl text-lg text-muted-foreground md:text-xl leading-relaxed">
-                Binlerce film ve diziyi keşfedin, inceleyin ve favorilerinizi oluşturun. 
+                Binlerce film ve diziyi keşfedin, inceleyin ve favorilerinizi oluşturun.
                 En yeni yapımlardan klasiklere kadar her şey parmaklarınızın ucunda.
               </p>
             </div>
-            
+
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-              <Button 
-                size="lg" 
-                className="group h-14 rounded-full px-8 text-lg font-semibold shadow-2xl shadow-primary/20 transition-all hover:scale-105 active:scale-95" 
+              <Button
+                size="lg"
+                className="group h-14 rounded-full px-8 text-lg font-semibold shadow-2xl shadow-primary/20 transition-all hover:scale-105 active:scale-95"
                 onClick={() => router.push('/search')}
               >
                 <Play className="mr-2 h-5 w-5 fill-current" />
                 Hemen Keşfet
               </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
+              <Button
+                size="lg"
+                variant="outline"
                 className="h-14 rounded-full px-8 text-lg font-semibold backdrop-blur-sm transition-all hover:bg-primary/5 hover:scale-105 active:scale-95"
                 onClick={handleRandomMovie}
                 disabled={randomLoading}
@@ -219,8 +219,8 @@ export default function Home() {
         {/* Featured Collections Grid */}
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {featuredCollections.map((collection, i) => (
-            <Card 
-              key={i} 
+            <Card
+              key={i}
               className="group relative overflow-hidden rounded-3xl border-none bg-muted/30 transition-all hover:bg-muted/50 cursor-pointer"
               onClick={() => handleQuickLinkClick(collection.type)}
             >
@@ -266,7 +266,7 @@ export default function Home() {
             <h2 className="text-3xl font-bold mb-4">Kategoriler</h2>
             <p className="text-muted-foreground text-lg">Sevdiğiniz türde film ve dizileri keşfedin</p>
           </div>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
             {categories.map((category) => (
               <Card
@@ -289,7 +289,7 @@ export default function Home() {
             <h2 className="text-3xl font-bold mb-4">Öne Çıkan Koleksiyonlar</h2>
             <p className="text-muted-foreground text-lg">Özel seçilmiş film ve dizi koleksiyonları</p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {featuredCollections.map((collection) => (
               <Card
@@ -313,7 +313,7 @@ export default function Home() {
             <h2 className="text-3xl font-bold mb-4">Öne Çıkan İçerikler</h2>
             <p className="text-muted-foreground text-lg">En çok yorum alan ve en yüksek puanlı yapımlar</p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <Card>
               <CardHeader>
@@ -386,7 +386,7 @@ export default function Home() {
             <h2 className="text-3xl font-bold mb-4">Trend Konular</h2>
             <p className="text-muted-foreground text-lg">Popüler arama konuları</p>
           </div>
-          
+
           <div className="flex flex-wrap gap-3 justify-center">
             {trendingTopics.map((topic) => (
               <Badge

@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Search, User, LogOut, Heart, Eye, MessageSquare, Film, Moon, Sun, Shield } from 'lucide-react';
+import { Search, User, LogOut, Heart, Eye, MessageSquare, Film, Moon, Sun, Shield, Users } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import { LoginForm } from './LoginForm';
 import { SearchPreview } from './SearchPreview';
@@ -47,19 +47,19 @@ export function Header() {
   // Role-based navigation after login - sadece gerekli durumlarda yönlendir
   useEffect(() => {
     if (loading) return;
-    
+
     if (user && userData) {
       // Blocked kullanıcıları çıkış yaptır
       if (userData.status === 'blocked') {
         logout();
         return;
       }
-      
+
       // Pending kullanıcıları sadece ana sayfadayken pending'e yönlendir
       if (userData.role === 'pending' && pathname === '/') {
         router.push('/pending');
       }
-      
+
       // Onaylanan kullanıcı pending sayfasındaysa anasayfaya yönlendir (live refresh ile)
       if ((userData.role === 'approved' || userData.role === 'admin') && pathname === '/pending') {
         toast.success('Hesabınız onaylandı! Hoş geldiniz 🎉');
@@ -99,11 +99,11 @@ export function Header() {
       <div className="container flex h-16 items-center justify-between gap-4 px-4">
         {/* Logo */}
         <Link href="/" className="group flex items-center space-x-2 transition-transform hover:scale-105 active:scale-95">
-          <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/20">
-            <Film className="h-6 w-6 text-primary transition-transform group-hover:rotate-12" />
+          <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/20 overflow-hidden">
+            <img src="/logo.png" alt="NOXEN Logo" className="h-full w-full object-cover" />
           </div>
           <span className="hidden text-2xl font-bold tracking-tight sm:inline-block">
-            <span className="text-gradient">CineMax</span>
+            <span className="text-gradient">NOXEN</span>
           </span>
         </Link>
 
@@ -126,7 +126,7 @@ export function Header() {
                 ref={inputRef}
                 className="h-10 w-full rounded-full bg-muted/50 pl-10 pr-4 transition-all focus:bg-background focus:ring-2 focus:ring-primary/20 md:w-[300px] lg:w-[400px]"
               />
-              
+
               {/* Anlık arama önizlemesi */}
               {showPreview && (
                 <div ref={previewRef} className="absolute top-full left-0 right-0 mt-2 max-h-96 overflow-y-auto rounded-2xl border bg-background/95 p-2 shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-top-2">
@@ -139,6 +139,12 @@ export function Header() {
 
         {/* Navigasyon */}
         <div className="flex items-center space-x-2 md:space-x-4">
+          <Link href="/watch-party" title="Odaya Katıl">
+            <Button variant="ghost" size="icon" className="rounded-full transition-colors hover:bg-primary/10 text-primary">
+              <Users className="h-5 w-5" />
+            </Button>
+          </Link>
+
           {/* Tema değiştirici */}
           {mounted && (
             <Button

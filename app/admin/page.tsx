@@ -21,7 +21,7 @@ import { toast } from 'sonner';
 import { formatDate } from '@/lib/firestore';
 import { RequireAuth } from '@/components/RequireAuth';
 
- function AdminPageInner() {
+function AdminPageInner() {
   const { user, userData } = useAuth();
   const router = useRouter();
   const [users, setUsers] = useState<UserData[]>([]);
@@ -51,7 +51,7 @@ import { RequireAuth } from '@/components/RequireAuth';
     episodes: undefined as number | undefined,
     genres: '' // Virgülle ayrılmış string olarak
   });
-  
+
   // Kullanıcı filtreleme
   useEffect(() => {
     console.log("Filtreleme çalıştı, filtre:", userFilter);
@@ -85,7 +85,7 @@ import { RequireAuth } from '@/components/RequireAuth';
 
     // Admin kullanıcısı olduğu doğrulandı, verileri yükle
     loadAdminData();
-    
+
     // Onay bekleyen kullanıcıları otomatik olarak göster
     if (stats.pendingUsers > 0) {
       setUserFilter('pending');
@@ -102,9 +102,9 @@ import { RequireAuth } from '@/components/RequireAuth';
         router.push('/');
         return;
       }
-      
+
       // Firebase bağlantı hatalarını yakalamak için timeout ekle
-      const timeoutPromise = new Promise((_, reject) => 
+      const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Firebase veri yükleme zaman aşımı')), 15000)
       );
 
@@ -123,7 +123,7 @@ import { RequireAuth } from '@/components/RequireAuth';
         return [] as UserData[];
       });
       setUsers(usersData || []);
-      
+
       // Onay bekleyen kullanıcıları otomatik filtrele
       const pendingUsers = usersData.filter(user => user.status === 'pending');
       if (pendingUsers.length > 0) {
@@ -132,7 +132,7 @@ import { RequireAuth } from '@/components/RequireAuth';
       } else {
         setFilteredUsers(usersData);
       }
-      
+
       // İstatistikleri doğrudan hesapla
       try {
         // Kullanıcı verilerinden istatistikleri hesapla
@@ -144,7 +144,7 @@ import { RequireAuth } from '@/components/RequireAuth';
           totalReviews: 0,
           totalMovies: 0
         };
-        
+
         // Film sayısını doğrudan Firestore'dan al
         const moviesCount = await import('firebase/firestore').then(async ({ collection, getDocs, getFirestore }) => {
           const db = getFirestore();
@@ -152,7 +152,7 @@ import { RequireAuth } from '@/components/RequireAuth';
           const querySnapshot = await getDocs(moviesRef);
           return querySnapshot.size;
         }).catch(() => 0);
-        
+
         statsData.totalMovies = moviesCount;
         setStats(statsData);
       } catch (error) {
@@ -166,7 +166,7 @@ import { RequireAuth } from '@/components/RequireAuth';
           totalMovies: 0
         });
       }
-      
+
       // Filmleri doğrudan Firestore'dan yükle
       try {
         const moviesData = await import('firebase/firestore').then(async ({ collection, getDocs, getFirestore }) => {
@@ -181,7 +181,7 @@ import { RequireAuth } from '@/components/RequireAuth';
         toast.error('Film verileri yüklenirken bir sorun oluştu');
         setMovies([]);
       }
-      
+
       // Tüm yorumları yükle
       if (usersData.length > 0) {
         try {
@@ -252,7 +252,7 @@ import { RequireAuth } from '@/components/RequireAuth';
       toast.error("Kullanıcı onaylanamadı: " + (error as Error).message);
     }
   };
-  
+
   const handleRejectUser = async (userId: string) => {
     try {
       // Doğrudan Firestore'a erişim
@@ -281,7 +281,7 @@ import { RequireAuth } from '@/components/RequireAuth';
 
       await updateUserStatus(userId, newStatus);
       await loadAdminData();
-      
+
       console.log(`Kullanıcı durumu güncellendi: ${userId}, yeni durum: ${newStatus}`);
       toast.success(`Kullanıcı ${newStatus === 'active' ? 'aktif edildi' : 'engellendi'}`);
     } catch (error) {
@@ -411,7 +411,7 @@ import { RequireAuth } from '@/components/RequireAuth';
             <Shield className="h-8 w-8 text-primary" />
             Admin Panel
           </h1>
-          <p className="text-muted-foreground">CineMax yönetim paneli</p>
+          <p className="text-muted-foreground">NOXEN yönetim paneli</p>
         </div>
         <Badge variant="secondary" className="text-lg px-4 py-2">
           <Crown className="h-4 w-4 mr-2" />
@@ -452,9 +452,9 @@ import { RequireAuth } from '@/components/RequireAuth';
             <div className="flex items-center">
               <div className="text-2xl font-bold text-yellow-600">{stats.pendingUsers}</div>
               {stats.pendingUsers > 0 && (
-                <Button 
-                  variant="link" 
-                  size="sm" 
+                <Button
+                  variant="link"
+                  size="sm"
                   className="ml-2 text-yellow-600 p-0 h-auto"
                   onClick={() => setUserFilter('pending')}
                 >
@@ -530,8 +530,8 @@ import { RequireAuth } from '@/components/RequireAuth';
                   <UserX className="h-4 w-4 mr-1" />
                   Onay Bekleyen: {users.filter(u => u.role === 'pending').length}
                 </Badge>
-                <Select 
-                  defaultValue="all" 
+                <Select
+                  defaultValue="all"
                   onValueChange={(value) => setUserFilter(value)}
                   value={userFilter}
                 >
@@ -581,7 +581,7 @@ import { RequireAuth } from '@/components/RequireAuth';
                         <TableCell>
                           <Select
                             value={user.role}
-                            onValueChange={(value: 'pending' | 'approved' | 'admin') => 
+                            onValueChange={(value: 'pending' | 'approved' | 'admin') =>
                               handleRoleChange(user.userId, value)
                             }
                           >
@@ -639,7 +639,7 @@ import { RequireAuth } from '@/components/RequireAuth';
                               size="sm"
                               variant="outline"
                               onClick={() => handleStatusChange(
-                                user.userId, 
+                                user.userId,
                                 user.status === 'active' ? 'blocked' : 'active'
                               )}
                             >

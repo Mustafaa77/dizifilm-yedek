@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'export',
+  reactStrictMode: false,
   images: {
     unoptimized: true,
   },
@@ -18,6 +20,13 @@ const nextConfig = {
         "utf-8-validate": false,
       };
     }
+
+    config.module.exprContextCritical = false;
+    config.ignoreWarnings = [
+      { module: /node_modules\/@protobufjs\/inquire\/index\.js/ },
+      { message: /Critical dependency: the request of a dependency is an expression/ }
+    ];
+
     return config;
   },
 };

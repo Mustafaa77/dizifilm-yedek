@@ -47,6 +47,7 @@ export interface TMDBMovieDetail extends TMDBMovie {
   budget: number;
   revenue: number;
   imdb_id: string | null;
+  videos?: { results: TMDBVideo[] };
 }
 
 export interface TMDBTVDetail extends TMDBTVSeries {
@@ -62,6 +63,7 @@ export interface TMDBTVDetail extends TMDBTVSeries {
   number_of_seasons: number;
   created_by: { id: number; name: string }[];
   networks: { id: number; name: string; logo_path: string | null }[];
+  videos?: { results: TMDBVideo[] };
 }
 
 export interface TMDBSearchResult {
@@ -141,11 +143,11 @@ export async function fetchMovieById(movieId: number): Promise<TMDBMovieDetail |
     const response = await fetch(
       `${BASE_URL}/movie/${movieId}?language=tr-TR`
     );
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
     return data;
   } catch (error) {
@@ -160,11 +162,11 @@ export async function fetchTVById(tvId: number): Promise<TMDBTVDetail | null> {
     const response = await fetch(
       `${BASE_URL}/tv/${tvId}?language=tr-TR`
     );
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
     return data;
   } catch (error) {
@@ -179,11 +181,11 @@ export async function fetchMovieVideos(movieId: number): Promise<TMDBVideo[]> {
     const response = await fetch(
       `${BASE_URL}/movie/${movieId}/videos?language=en-US`
     );
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data: TMDBVideosResponse = await response.json();
     return data.results;
   } catch (error) {
@@ -198,11 +200,11 @@ export async function fetchTVVideos(tvId: number): Promise<TMDBVideo[]> {
     const response = await fetch(
       `${BASE_URL}/tv/${tvId}/videos?language=en-US`
     );
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data: TMDBVideosResponse = await response.json();
     return data.results;
   } catch (error) {
@@ -297,7 +299,7 @@ export async function fetchTVSeasons(tvId: number): Promise<TMDBSeason[]> {
     // Önce dizi detaylarını çekelim, sezon bilgileri burada yer alıyor
     const tvDetails = await fetchTVById(tvId);
     if (!tvDetails) return [];
-    
+
     // Sezon bilgilerini döndür
     return tvDetails.seasons || [];
   } catch (error) {
@@ -307,16 +309,16 @@ export async function fetchTVSeasons(tvId: number): Promise<TMDBSeason[]> {
 }
 
 // TMDB arama fonksiyonu
-export async function searchTMDB(query: string, page: number = 1): Promise<{results: TMDBSearchResult[], total_pages: number}> {
+export async function searchTMDB(query: string, page: number = 1): Promise<{ results: TMDBSearchResult[], total_pages: number }> {
   try {
     const response = await fetch(
       `${BASE_URL}/search/multi?language=tr-TR&query=${encodeURIComponent(query)}&page=${page}`
     );
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
     return {
       results: data.results.filter((item: any) => item.media_type === 'movie' || item.media_type === 'tv'),
@@ -324,7 +326,7 @@ export async function searchTMDB(query: string, page: number = 1): Promise<{resu
     };
   } catch (error) {
     console.error("Arama yapılırken hata:", error);
-    return {results: [], total_pages: 0};
+    return { results: [], total_pages: 0 };
   }
 }
 
@@ -334,11 +336,11 @@ export async function fetchSeasonEpisodes(tvId: number, seasonNumber: number): P
     const response = await fetch(
       `${BASE_URL}/tv/${tvId}/season/${seasonNumber}?language=tr-TR`
     );
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
     return data.episodes || [];
   } catch (error) {
@@ -352,11 +354,11 @@ export function getYouTubeTrailerUrl(videos: TMDBVideo[]): string | null {
   const trailer = videos.find(
     video => video.type === "Trailer" && video.site === "YouTube"
   );
-  
+
   if (trailer) {
     return `https://www.youtube.com/embed/${trailer.key}?autoplay=0&rel=0&modestbranding=1&controls=1&showinfo=0&fs=1&cc_load_policy=0&iv_load_policy=3&autohide=0&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`;
   }
-  
+
   return null;
 }
 
@@ -366,14 +368,14 @@ export async function searchMulti(query: string, page = 1): Promise<TMDBSearchRe
     const response = await fetch(
       `${BASE_URL}/search/multi?language=tr-TR&query=${encodeURIComponent(query)}&page=${page}`
     );
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
     // Sadece film ve dizi sonuçlarını filtrele
-    data.results = data.results.filter((item: any) => 
+    data.results = data.results.filter((item: any) =>
       item.media_type === 'movie' || item.media_type === 'tv'
     );
     return data;
@@ -394,11 +396,11 @@ export async function searchMovies(query: string, page = 1): Promise<TMDBSearchR
     const response = await fetch(
       `${BASE_URL}/search/movie?language=tr-TR&query=${encodeURIComponent(query)}&page=${page}`
     );
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
     // Media type ekle
     data.results = data.results.map((item: any) => ({ ...item, media_type: 'movie' }));
@@ -420,11 +422,11 @@ export async function searchTVSeries(query: string, page = 1): Promise<TMDBSearc
     const response = await fetch(
       `${BASE_URL}/search/tv?language=tr-TR&query=${encodeURIComponent(query)}&page=${page}`
     );
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
     // Media type ekle
     data.results = data.results.map((item: any) => ({ ...item, media_type: 'tv' }));
@@ -446,11 +448,11 @@ export async function fetchPopularMovies(page = 1): Promise<TMDBSearchResult> {
     const response = await fetch(
       `${BASE_URL}/movie/popular?language=tr-TR&page=${page}`
     );
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
     // Media type ekle
     data.results = data.results.map((item: any) => ({ ...item, media_type: 'movie' }));
@@ -472,11 +474,11 @@ export async function fetchPopularTVSeries(page = 1): Promise<TMDBSearchResult> 
     const response = await fetch(
       `${BASE_URL}/tv/popular?language=tr-TR&page=${page}`
     );
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
     // Media type ekle
     data.results = data.results.map((item: any) => ({ ...item, media_type: 'tv' }));
@@ -498,11 +500,11 @@ export async function fetchTopRatedMovies(page = 1): Promise<TMDBSearchResult> {
     const response = await fetch(
       `${BASE_URL}/movie/top_rated?language=tr-TR&page=${page}`
     );
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
     // Media type ekle
     data.results = data.results.map((item: any) => ({ ...item, media_type: 'movie' }));
@@ -524,11 +526,11 @@ export async function fetchTopRatedTVSeries(page = 1): Promise<TMDBSearchResult>
     const response = await fetch(
       `${BASE_URL}/tv/top_rated?language=tr-TR&page=${page}`
     );
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
     // Media type ekle
     data.results = data.results.map((item: any) => ({ ...item, media_type: 'tv' }));
@@ -550,11 +552,11 @@ export async function fetchUpcomingMovies(page = 1): Promise<TMDBSearchResult> {
     const response = await fetch(
       `${BASE_URL}/movie/upcoming?language=tr-TR&page=${page}`
     );
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
     // Media type ekle
     data.results = data.results.map((item: any) => ({ ...item, media_type: 'movie' }));
@@ -576,11 +578,11 @@ export async function fetchNowPlayingMovies(page = 1): Promise<TMDBSearchResult>
     const response = await fetch(
       `${BASE_URL}/movie/now_playing?language=tr-TR&page=${page}`
     );
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
     // Media type ekle
     data.results = data.results.map((item: any) => ({ ...item, media_type: 'movie' }));
@@ -602,11 +604,11 @@ export async function fetchOnTheAirTVSeries(page = 1): Promise<TMDBSearchResult>
     const response = await fetch(
       `${BASE_URL}/tv/on_the_air?language=tr-TR&page=${page}`
     );
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
     // Media type ekle
     data.results = data.results.map((item: any) => ({ ...item, media_type: 'tv' }));
@@ -628,11 +630,11 @@ export async function fetchMoviesByGenre(genreId: number, page = 1): Promise<TMD
     const response = await fetch(
       `${BASE_URL}/discover/movie?language=tr-TR&with_genres=${genreId}&page=${page}`
     );
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
     // Media type ekle
     data.results = data.results.map((item: any) => ({ ...item, media_type: 'movie' }));
@@ -654,11 +656,11 @@ export async function fetchTVSeriesByGenre(genreId: number, page = 1): Promise<T
     const response = await fetch(
       `${BASE_URL}/discover/tv?language=tr-TR&with_genres=${genreId}&page=${page}`
     );
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
     // Media type ekle
     data.results = data.results.map((item: any) => ({ ...item, media_type: 'tv' }));
@@ -678,7 +680,7 @@ export async function fetchTVSeriesByGenre(genreId: number, page = 1): Promise<T
 export async function searchByYear(year: string, mediaType: string = 'all', page = 1): Promise<TMDBSearchResult> {
   try {
     let url = '';
-    
+
     if (mediaType === 'movie') {
       url = `${BASE_URL}/discover/movie?language=tr-TR&primary_release_year=${year}&page=${page}`;
     } else if (mediaType === 'tv') {
@@ -689,7 +691,7 @@ export async function searchByYear(year: string, mediaType: string = 'all', page
         searchByYear(year, 'movie', page),
         searchByYear(year, 'tv', page)
       ]);
-      
+
       return {
         page: page,
         results: [...movieResults.results, ...tvResults.results],
@@ -697,18 +699,18 @@ export async function searchByYear(year: string, mediaType: string = 'all', page
         total_results: movieResults.total_results + tvResults.total_results
       };
     }
-    
+
     const response = await fetch(url);
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
     // Media type ekle
-    data.results = data.results.map((item: any) => ({ 
-      ...item, 
-      media_type: mediaType === 'movie' ? 'movie' : 'tv' 
+    data.results = data.results.map((item: any) => ({
+      ...item,
+      media_type: mediaType === 'movie' ? 'movie' : 'tv'
     }));
     return data;
   } catch (error) {
@@ -788,10 +790,10 @@ export const genreMap: { [key: number]: string } = {
 
 // Popüler Film ID'leri listesi
 export const popularMovieIds = [
-  550, 155, 13, 680, 27205, 157336, 278, 238, 129, 11, 120, 122, 121, 
-  603, 807, 1124, 98, 1422, 244786, 496243, 8587, 105, 348, 497, 101, 
-  77, 10681, 299536, 324857, 769, 1891, 68718, 475557, 872585, 693134, 
-  111, 641, 1088, 389, 424, 19404, 274, 348350, 11324, 73, 107, 118340, 
+  550, 155, 13, 680, 27205, 157336, 278, 238, 129, 11, 120, 122, 121,
+  603, 807, 1124, 98, 1422, 244786, 496243, 8587, 105, 348, 497, 101,
+  77, 10681, 299536, 324857, 769, 1891, 68718, 475557, 872585, 693134,
+  111, 641, 1088, 389, 424, 19404, 274, 348350, 11324, 73, 107, 118340,
   284054, 313369, 128, 41154, 508965, 372058, 24428, 862, 240
 ];
 

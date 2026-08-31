@@ -15,22 +15,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: 'userId ve email gerekli' }, { status: 400 });
     }
 
-    const from = process.env.SMTP_FROM || 'no-reply@cinemax.local';
+    const from = process.env.SMTP_FROM || 'no-reply@noxen.local';
     const host = process.env.SMTP_HOST;
     const port = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : undefined;
     const smtpUser = process.env.SMTP_USER;
     const pass = process.env.SMTP_PASS;
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (typeof process !== 'undefined' ? 'http://localhost:3001' : '');
 
-    const subject = '🎉 Hesabınız Onaylandı — CineMax';
+    const subject = '🎉 Hesabınız Onaylandı — NOXEN';
     const text = `Merhaba ${displayName || username || 'Kullanıcı'},
 
-CineMax hesabınız başarıyla onaylandı! Artık tüm özelliklerden (izleme listeleri, yorumlar, arama vb.) faydalanabilirsiniz.
+NOXEN hesabınız başarıyla onaylandı! Artık tüm özelliklerden (izleme listeleri, yorumlar, arama vb.) faydalanabilirsiniz.
 
 Hesabınıza giriş yapın: ${siteUrl}/
 
 Keyifli izlemeler dileriz.
-CineMax Ekibi
+NOXEN Ekibi
 `;
     const html = `
       <div style="font-family:Arial,sans-serif;font-size:15px;color:#111;max-width:600px;margin:0 auto">
@@ -38,12 +38,12 @@ CineMax Ekibi
           <h1 style="margin:0;font-size:26px">🎉 Hoş Geldiniz, ${displayName || username || 'Kullanıcı'}!</h1>
         </div>
         <div style="padding:32px 24px;background:#fff;border:1px solid #eee;border-top:none;border-radius:0 0 16px 16px">
-          <p style="font-size:17px">CineMax hesabınız <strong>başarıyla onaylandı</strong>. 🎬</p>
+          <p style="font-size:17px">NOXEN hesabınız <strong>başarıyla onaylandı</strong>. 🎬</p>
           <p style="color:#555">Artık binlerce film ve diziyi keşfedebilir, izleme listelerini yönetebilir, yorumlarınızı paylaşabilirsiniz.</p>
           <div style="margin:24px 0; text-align:center">
             <a href="${siteUrl}/" style="display:inline-block;padding:14px 32px;background:#10b981;color:#fff;font-weight:600;border-radius:12px;text-decoration:none">Hemen Giriş Yap →</a>
           </div>
-          <p style="color:#888;font-size:13px">Keyifli izlemeler dileriz.<br/>CineMax Ekibi</p>
+          <p style="color:#888;font-size:13px">Keyifli izlemeler dileriz.<br/>NOXEN Ekibi</p>
         </div>
       </div>
     `;

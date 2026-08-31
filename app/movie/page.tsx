@@ -18,6 +18,7 @@ import { Heart, Eye, Star, Calendar, Clock, User, MessageSquare, Send, Play, Sha
 import { TMDBMovieDetail, TMDBVideo, fetchMovieById, fetchMovieVideos, getYouTubeTrailerUrl, getPosterUrl, getBackdropUrl } from '@/lib/tmdb';
 import { useAuth } from '@/contexts/AuthContext';
 import { toggleFavorite, toggleWatched, toggleWatchLater, addReview, getReviews, deleteReview, Review, formatDate } from '@/lib/firestore';
+import { createWatchParty } from '@/lib/watchParty';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -26,7 +27,7 @@ function MovieDetailContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user, userData, refreshUserData } = useAuth();
-  
+
   const movieId = searchParams.get('id') || '';
   const [movie, setMovie] = useState<TMDBMovieDetail | null>(null);
   const [videos, setVideos] = useState<TMDBVideo[]>([]);
@@ -37,7 +38,7 @@ function MovieDetailContent() {
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showTrailer, setShowTrailer] = useState(false);
-  
+
   const [newReview, setNewReview] = useState({
     rating: '',
     comment: '',
@@ -68,16 +69,16 @@ function MovieDetailContent() {
         setLoading(false);
         return;
       }
-      
+
       setLoading(true);
       setError('');
-      
+
       try {
         const [movieData, videosData] = await Promise.all([
           fetchMovieById(parseInt(movieId)),
           fetchMovieVideos(parseInt(movieId))
         ]);
-        
+
         if (movieData) {
           setMovie(movieData);
           setVideos(videosData);
@@ -101,7 +102,7 @@ function MovieDetailContent() {
       toast.error('Favorilere eklemek için giriş yapın');
       return;
     }
-    
+
     setActionLoading(true);
     try {
       await toggleFavorite(user.uid, movieId);
@@ -120,7 +121,7 @@ function MovieDetailContent() {
       toast.error('İzleme listesine eklemek için giriş yapın');
       return;
     }
-    
+
     setActionLoading(true);
     try {
       await toggleWatched(user.uid, movieId);
@@ -139,7 +140,7 @@ function MovieDetailContent() {
       toast.error('İzlenecek listesine eklemek için giriş yapın');
       return;
     }
-    
+
     setActionLoading(true);
     try {
       await toggleWatchLater(user.uid, movieId);
@@ -158,14 +159,14 @@ function MovieDetailContent() {
       toast.error('Yorum yapmak için giriş yapın');
       return;
     }
-    
+
     if (!newReview.rating || !newReview.comment.trim()) {
       toast.error('Lütfen puan ve yorum alanlarını doldurun');
       return;
     }
-    
+
     setReviewLoading(true);
-    
+
     try {
       await addReview({
         imdbId: movieId,
@@ -176,7 +177,7 @@ function MovieDetailContent() {
         spoiler: !!newReview.spoiler,
         movieTitle: movie?.title || '',
       });
-      
+
       await loadReviews();
       setNewReview({ rating: '', comment: '', spoiler: false });
       toast.success('Yorumunuz başarıyla eklendi');
@@ -190,7 +191,7 @@ function MovieDetailContent() {
 
   const handleDeleteReview = async (reviewId: string) => {
     if (!user) return;
-    
+
     try {
       await deleteReview(reviewId);
       await loadReviews();
@@ -237,8 +238,8 @@ function MovieDetailContent() {
   if (error || !movie) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           onClick={handleGoBack}
           className="mb-6"
         >
@@ -252,8 +253,8 @@ function MovieDetailContent() {
     );
   }
 
-  const averageRating = reviews.length > 0 
-    ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length 
+  const averageRating = reviews.length > 0
+    ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
     : 0;
 
   const posterUrl = getPosterUrl(movie.poster_path);
@@ -275,11 +276,11 @@ function MovieDetailContent() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-transparent to-transparent hidden lg:block" />
-        
+
         {/* Back Button */}
         <div className="container relative z-10 h-full flex flex-col justify-end pb-12 px-4">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="sm"
             onClick={handleGoBack}
             className="absolute top-8 left-4 rounded-full bg-background/20 backdrop-blur-md hover:bg-background/40 transition-all"
@@ -287,7 +288,7 @@ function MovieDetailContent() {
             <ArrowLeft className="h-5 w-5 mr-2" />
             Geri Dön
           </Button>
-          
+
           <div className="max-w-4xl space-y-6 animate-reveal fade-in slide-in-from-bottom-8 duration-700">
             <div className="flex flex-wrap gap-2">
               <Badge variant="secondary" className="bg-primary/20 text-primary border-none rounded-full px-4 py-1 backdrop-blur-md">
@@ -300,11 +301,11 @@ function MovieDetailContent() {
                 </Badge>
               )}
             </div>
-            
+
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-gradient leading-tight">
               {movie.title}
             </h1>
-            
+
             <div className="flex flex-wrap items-center gap-6 text-sm md:text-base font-medium text-muted-foreground">
               <div className="flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-primary" />
@@ -338,8 +339,8 @@ function MovieDetailContent() {
                   className="w-full h-auto object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                  <Button 
-                    size="lg" 
+                  <Button
+                    size="lg"
                     className="rounded-full h-16 w-16 p-0 bg-primary hover:scale-110 transition-transform shadow-xl shadow-primary/40"
                     onClick={handleWatchTrailer}
                   >
@@ -350,8 +351,8 @@ function MovieDetailContent() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 variant={isFavorite ? "default" : "outline"}
                 className={cn(
                   "rounded-2xl h-14 transition-all duration-300",
@@ -363,8 +364,8 @@ function MovieDetailContent() {
                 <Heart className={cn("h-5 w-5 mr-2", isFavorite && "fill-current")} />
                 {isFavorite ? 'Favoride' : 'Favoriye Ekle'}
               </Button>
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 variant={isWatched ? "default" : "outline"}
                 className={cn(
                   "rounded-2xl h-14 transition-all duration-300",
@@ -376,8 +377,8 @@ function MovieDetailContent() {
                 <Eye className={cn("h-5 w-5 mr-2", isWatched && "fill-current")} />
                 {isWatched ? 'İzlendi' : 'İzledim'}
               </Button>
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 variant={isWatchLater ? "default" : "outline"}
                 className={cn(
                   "rounded-2xl h-14 col-span-2 transition-all duration-300",
@@ -445,21 +446,39 @@ function MovieDetailContent() {
 
             {/* İzle Butonu ve Watch Party */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="h-16 rounded-2xl text-xl font-bold bg-gradient-to-r from-primary to-blue-600 shadow-xl shadow-primary/20 hover:scale-[1.01] transition-all"
                 onClick={() => router.push(`/movie/watch?id=${movieId}`)}
               >
                 <Play className="h-6 w-6 mr-3 fill-current" />
                 Hemen İzle
               </Button>
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 variant="outline"
                 className="h-16 rounded-2xl text-xl font-bold border-2 border-primary/20 hover:bg-primary/5 hover:border-primary/40 transition-all group"
-                onClick={() => {
-                  const roomId = Math.random().toString(36).substring(2, 9);
-                  router.push(`/watch-party?roomId=${roomId}&movieId=${movieId}`);
+                onClick={async () => {
+                  if (!user) {
+                    toast.error('Oda oluşturmak için giriş yapmalısınız');
+                    return;
+                  }
+                  setActionLoading(true);
+                  try {
+                    const roomId = await createWatchParty(
+                      user.uid,
+                      userData?.username || user.displayName || 'Kullanıcı',
+                      userData?.avatarUrl,
+                      movieId,
+                      'movie',
+                      movie?.title || 'İzleme Odası'
+                    );
+                    router.push(`/watch-party/${roomId}`);
+                  } catch (e) {
+                    toast.error('Oda oluşturulamadı');
+                  } finally {
+                    setActionLoading(false);
+                  }
                 }}
               >
                 <Users className="h-6 w-6 mr-3 transition-transform group-hover:scale-110" />
@@ -469,7 +488,7 @@ function MovieDetailContent() {
 
             {/* Yorumlar Bölümü */}
             <Separator className="bg-muted/50" />
-            
+
             <section className="space-y-8">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -519,9 +538,9 @@ function MovieDetailContent() {
                     </div>
                     <div className="flex items-end pb-2">
                       <div className="flex items-center space-x-2">
-                        <Checkbox 
-                          id="spoiler" 
-                          checked={newReview.spoiler} 
+                        <Checkbox
+                          id="spoiler"
+                          checked={newReview.spoiler}
                           onCheckedChange={(checked) => setNewReview(prev => ({ ...prev, spoiler: checked === true }))}
                           className="rounded-md border-primary"
                         />
@@ -532,15 +551,15 @@ function MovieDetailContent() {
 
                   <div className="space-y-2">
                     <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Yorumunuz</Label>
-                    <Textarea 
-                      placeholder="Film hakkında ne düşünüyorsunuz?" 
+                    <Textarea
+                      placeholder="Film hakkında ne düşünüyorsunuz?"
                       className="rounded-2xl bg-background/50 border-none min-h-[120px] focus:ring-2 focus:ring-primary/20 transition-all"
                       value={newReview.comment}
                       onChange={(e) => setNewReview(prev => ({ ...prev, comment: e.target.value }))}
                     />
                   </div>
 
-                  <Button 
+                  <Button
                     className="w-full h-12 rounded-xl font-bold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02]"
                     onClick={handleSubmitReview}
                     disabled={reviewLoading}
@@ -586,9 +605,9 @@ function MovieDetailContent() {
                           </div>
                         </div>
                         {(user?.uid === review.userId || userData?.role === 'admin') && (
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             className="rounded-full text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
                             onClick={() => handleDeleteReview(review.id!)}
                           >

@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     const port = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : undefined;
     const user = process.env.SMTP_USER;
     const pass = process.env.SMTP_PASS;
-    const from = process.env.SMTP_FROM || 'no-reply@cinemax.local';
+    const from = process.env.SMTP_FROM || 'no-reply@noxen.local';
 
     if (host && port && user && pass) {
       const nodemailer = await import('nodemailer');
@@ -53,11 +53,11 @@ export async function POST(req: Request) {
       const info = await transporter.sendMail({
         from,
         to: email,
-        subject: 'CineMax Kayıt Doğrulama Kodu',
+        subject: 'NOXEN Kayıt Doğrulama Kodu',
         text: `Doğrulama kodunuz: ${code}. Bu kod 10 dakika içinde geçerlidir.`,
         html: `
           <div style="font-family:Arial,sans-serif;font-size:14px;color:#111">
-            <h2>CineMax</h2>
+            <h2>NOXEN</h2>
             <p>Hesabınızı doğrulamak için aşağıdaki kodu girin:</p>
             <div style="font-size:28px;font-weight:bold;letter-spacing:6px;padding:12px 16px;background:#f5f5f5;border-radius:12px;display:inline-block">${code}</div>
             <p>Bu kod 10 dakika içinde geçerlidir. Başkasıyla paylaşmayın.</p>

@@ -65,9 +65,9 @@ export default function WatchTVPage() {
     <div className="min-h-screen bg-black">
       {/* Header */}
       <div className="absolute top-0 left-0 right-0 z-50 p-4 bg-gradient-to-b from-black/80 to-transparent flex items-center justify-between pointer-events-none">
-        <Button 
-          variant="ghost" 
-          size="sm" 
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => router.back()}
           className="rounded-full bg-white/10 backdrop-blur-md text-white hover:bg-white/20 pointer-events-auto"
         >
@@ -75,9 +75,9 @@ export default function WatchTVPage() {
           Geri Dön
         </Button>
         <div className="flex gap-2 pointer-events-auto">
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => {
               navigator.clipboard.writeText(window.location.href);
               toast.success('Link kopyalandı!');
@@ -107,7 +107,7 @@ export default function WatchTVPage() {
             </div>
             <div className="space-y-2">
               <h2 className="text-2xl font-bold text-white">İzlemek için Giriş Yapın</h2>
-              <p className="text-muted-foreground">Bu içeriği izleyebilmek için CineMax hesabınıza giriş yapmanız gerekmektedir.</p>
+              <p className="text-muted-foreground">Bu içeriği izleyebilmek için NOXEN hesabınıza giriş yapmanız gerekmektedir.</p>
             </div>
             <Button size="lg" className="rounded-full px-8" onClick={() => setShowLogin(true)}>
               Giriş Yap

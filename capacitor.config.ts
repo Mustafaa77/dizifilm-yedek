@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.md.flixit',
-  appName: 'Flixit',
+  appId: 'com.md.noxen',
+  appName: 'NOXEN',
   webDir: 'out',
   server: {
     androidScheme: 'https',
