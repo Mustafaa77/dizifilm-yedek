@@ -1,4 +1,12 @@
-const BASE_URL = "/api/tmdb";
+const BASE_URL = "https://api.themoviedb.org/3";
+const API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY || process.env.TMDB_API_KEY || '';
+
+async function apiFetch(endpoint) {
+  const separator = endpoint.includes('?') ? '&' : '?';
+  const url = endpoint.startsWith('http') ? endpoint : `${BASE_URL}${endpoint}${separator}api_key=${API_KEY}`;
+  return fetch(url);
+}
+
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 
 export interface TMDBItem {
@@ -140,9 +148,7 @@ export interface TMDBCredits {
 // Film detaylarını ID ile çekme
 export async function fetchMovieById(movieId: number): Promise<TMDBMovieDetail | null> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/movie/${movieId}?language=tr-TR`
-    );
+    const response = await apiFetch(`/movie/${movieId}?language=tr-TR`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -159,9 +165,7 @@ export async function fetchMovieById(movieId: number): Promise<TMDBMovieDetail |
 // Dizi detaylarını ID ile çekme
 export async function fetchTVById(tvId: number): Promise<TMDBTVDetail | null> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/tv/${tvId}?language=tr-TR`
-    );
+    const response = await apiFetch(`/tv/${tvId}?language=tr-TR`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -178,9 +182,7 @@ export async function fetchTVById(tvId: number): Promise<TMDBTVDetail | null> {
 // Film videolarını çekme (fragman için)
 export async function fetchMovieVideos(movieId: number): Promise<TMDBVideo[]> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/movie/${movieId}/videos?language=en-US`
-    );
+    const response = await apiFetch(`/movie/${movieId}/videos?language=en-US`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -197,9 +199,7 @@ export async function fetchMovieVideos(movieId: number): Promise<TMDBVideo[]> {
 // Dizi videolarını çekme (fragman için)
 export async function fetchTVVideos(tvId: number): Promise<TMDBVideo[]> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/tv/${tvId}/videos?language=en-US`
-    );
+    const response = await apiFetch(`/tv/${tvId}/videos?language=en-US`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -216,9 +216,7 @@ export async function fetchTVVideos(tvId: number): Promise<TMDBVideo[]> {
 // Film oyuncu + ekip (credits)
 export async function fetchMovieCredits(movieId: number): Promise<TMDBCredits | null> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/movie/${movieId}/credits?language=tr-TR`
-    );
+    const response = await apiFetch(`/movie/${movieId}/credits?language=tr-TR`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -232,9 +230,7 @@ export async function fetchMovieCredits(movieId: number): Promise<TMDBCredits | 
 // Dizi oyuncu + ekip (credits)
 export async function fetchTVCredits(tvId: number): Promise<TMDBCredits | null> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/tv/${tvId}/credits?language=tr-TR`
-    );
+    const response = await apiFetch(`/tv/${tvId}/credits?language=tr-TR`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -248,9 +244,7 @@ export async function fetchTVCredits(tvId: number): Promise<TMDBCredits | null> 
 // Benzer filmler
 export async function fetchSimilarMovies(movieId: number): Promise<TMDBSearchResult> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/movie/${movieId}/similar?language=tr-TR&page=1`
-    );
+    const response = await apiFetch(`/movie/${movieId}/similar?language=tr-TR&page=1`);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
     data.results = (data.results || []).map((item: any) => ({ ...item, media_type: 'movie' }));
@@ -264,9 +258,7 @@ export async function fetchSimilarMovies(movieId: number): Promise<TMDBSearchRes
 // Benzer diziler
 export async function fetchSimilarTVSeries(tvId: number): Promise<TMDBSearchResult> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/tv/${tvId}/similar?language=tr-TR&page=1`
-    );
+    const response = await apiFetch(`/tv/${tvId}/similar?language=tr-TR&page=1`);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
     data.results = (data.results || []).map((item: any) => ({ ...item, media_type: 'tv' }));
@@ -280,9 +272,7 @@ export async function fetchSimilarTVSeries(tvId: number): Promise<TMDBSearchResu
 // Önerilen filmler
 export async function fetchMovieRecommendations(movieId: number): Promise<TMDBSearchResult> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/movie/${movieId}/recommendations?language=tr-TR&page=1`
-    );
+    const response = await apiFetch(`/movie/${movieId}/recommendations?language=tr-TR&page=1`);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
     data.results = (data.results || []).map((item: any) => ({ ...item, media_type: 'movie' }));
@@ -311,9 +301,7 @@ export async function fetchTVSeasons(tvId: number): Promise<TMDBSeason[]> {
 // TMDB arama fonksiyonu
 export async function searchTMDB(query: string, page: number = 1): Promise<{ results: TMDBSearchResult[], total_pages: number }> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/search/multi?language=tr-TR&query=${encodeURIComponent(query)}&page=${page}`
-    );
+    const response = await apiFetch(`/search/multi?language=tr-TR&query=${encodeURIComponent(query)}&page=${page}`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -333,9 +321,7 @@ export async function searchTMDB(query: string, page: number = 1): Promise<{ res
 // Belirli bir sezonun bölümlerini çekme
 export async function fetchSeasonEpisodes(tvId: number, seasonNumber: number): Promise<TMDBEpisode[]> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/tv/${tvId}/season/${seasonNumber}?language=tr-TR`
-    );
+    const response = await apiFetch(`/tv/${tvId}/season/${seasonNumber}?language=tr-TR`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -365,9 +351,7 @@ export function getYouTubeTrailerUrl(videos: TMDBVideo[]): string | null {
 // Multi arama (film + dizi)
 export async function searchMulti(query: string, page = 1): Promise<TMDBSearchResult> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/search/multi?language=tr-TR&query=${encodeURIComponent(query)}&page=${page}`
-    );
+    const response = await apiFetch(`/search/multi?language=tr-TR&query=${encodeURIComponent(query)}&page=${page}`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -393,9 +377,7 @@ export async function searchMulti(query: string, page = 1): Promise<TMDBSearchRe
 // Sadece film arama
 export async function searchMovies(query: string, page = 1): Promise<TMDBSearchResult> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/search/movie?language=tr-TR&query=${encodeURIComponent(query)}&page=${page}`
-    );
+    const response = await apiFetch(`/search/movie?language=tr-TR&query=${encodeURIComponent(query)}&page=${page}`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -419,9 +401,7 @@ export async function searchMovies(query: string, page = 1): Promise<TMDBSearchR
 // Sadece dizi arama
 export async function searchTVSeries(query: string, page = 1): Promise<TMDBSearchResult> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/search/tv?language=tr-TR&query=${encodeURIComponent(query)}&page=${page}`
-    );
+    const response = await apiFetch(`/search/tv?language=tr-TR&query=${encodeURIComponent(query)}&page=${page}`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -445,9 +425,7 @@ export async function searchTVSeries(query: string, page = 1): Promise<TMDBSearc
 // Popüler filmleri çekme
 export async function fetchPopularMovies(page = 1): Promise<TMDBSearchResult> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/movie/popular?language=tr-TR&page=${page}`
-    );
+    const response = await apiFetch(`/movie/popular?language=tr-TR&page=${page}`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -471,9 +449,7 @@ export async function fetchPopularMovies(page = 1): Promise<TMDBSearchResult> {
 // Popüler dizileri çekme
 export async function fetchPopularTVSeries(page = 1): Promise<TMDBSearchResult> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/tv/popular?language=tr-TR&page=${page}`
-    );
+    const response = await apiFetch(`/tv/popular?language=tr-TR&page=${page}`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -497,9 +473,7 @@ export async function fetchPopularTVSeries(page = 1): Promise<TMDBSearchResult> 
 // En çok oy alan filmleri çekme
 export async function fetchTopRatedMovies(page = 1): Promise<TMDBSearchResult> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/movie/top_rated?language=tr-TR&page=${page}`
-    );
+    const response = await apiFetch(`/movie/top_rated?language=tr-TR&page=${page}`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -523,9 +497,7 @@ export async function fetchTopRatedMovies(page = 1): Promise<TMDBSearchResult> {
 // En çok oy alan dizileri çekme
 export async function fetchTopRatedTVSeries(page = 1): Promise<TMDBSearchResult> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/tv/top_rated?language=tr-TR&page=${page}`
-    );
+    const response = await apiFetch(`/tv/top_rated?language=tr-TR&page=${page}`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -549,9 +521,7 @@ export async function fetchTopRatedTVSeries(page = 1): Promise<TMDBSearchResult>
 // Yakında çıkacak filmleri çekme
 export async function fetchUpcomingMovies(page = 1): Promise<TMDBSearchResult> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/movie/upcoming?language=tr-TR&page=${page}`
-    );
+    const response = await apiFetch(`/movie/upcoming?language=tr-TR&page=${page}`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -575,9 +545,7 @@ export async function fetchUpcomingMovies(page = 1): Promise<TMDBSearchResult> {
 // Şu anda vizyonda olan filmleri çekme
 export async function fetchNowPlayingMovies(page = 1): Promise<TMDBSearchResult> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/movie/now_playing?language=tr-TR&page=${page}`
-    );
+    const response = await apiFetch(`/movie/now_playing?language=tr-TR&page=${page}`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -601,9 +569,7 @@ export async function fetchNowPlayingMovies(page = 1): Promise<TMDBSearchResult>
 // Şu anda yayında olan dizileri çekme
 export async function fetchOnTheAirTVSeries(page = 1): Promise<TMDBSearchResult> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/tv/on_the_air?language=tr-TR&page=${page}`
-    );
+    const response = await apiFetch(`/tv/on_the_air?language=tr-TR&page=${page}`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -627,9 +593,7 @@ export async function fetchOnTheAirTVSeries(page = 1): Promise<TMDBSearchResult>
 // Kategoriye göre film çekme
 export async function fetchMoviesByGenre(genreId: number, page = 1): Promise<TMDBSearchResult> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/discover/movie?language=tr-TR&with_genres=${genreId}&page=${page}`
-    );
+    const response = await apiFetch(`/discover/movie?language=tr-TR&with_genres=${genreId}&page=${page}`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -653,9 +617,7 @@ export async function fetchMoviesByGenre(genreId: number, page = 1): Promise<TMD
 // Kategoriye göre dizi çekme
 export async function fetchTVSeriesByGenre(genreId: number, page = 1): Promise<TMDBSearchResult> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/discover/tv?language=tr-TR&with_genres=${genreId}&page=${page}`
-    );
+    const response = await apiFetch(`/discover/tv?language=tr-TR&with_genres=${genreId}&page=${page}`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -700,7 +662,7 @@ export async function searchByYear(year: string, mediaType: string = 'all', page
       };
     }
 
-    const response = await fetch(url);
+    const response = await apiFetch(url.replace(BASE_URL, ""));
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

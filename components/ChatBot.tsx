@@ -54,30 +54,39 @@ export default function ChatBot({ pageContext }: ChatBotProps) {
         setLoading(true);
 
         try {
-            // Build history in Gemini SDK format (exclude welcome message)
-            const history = messages.slice(1).map(m => ({
+            const { GoogleGenerativeAI } = await import('@google/generative-ai');
+            const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '');
+
+            const SYSTEM_INSTRUCTION = `Sen NoxBot'sun. NOXEN platformunun film/dizi öneri asistanısın.
+Kurallar:
+- HER ZAMAN Türkçe yanıtla
+- Kısa ve sade yaz, maksimum 3-4 cümle. Gereksiz uzatma.
+- Günlük, samimi bir dil kullan. Arkadaşınla sohbet eder gibi yaz.
+- ASLA şatafatlı, abartılı, pazarlama dili kullanma.
+- Film/dizi adını **kalın** yaz, yanına yılını ekle yeterli.
+- Spoiler verme
+- NOXEN özelliklerini (Favoriler, Watch Party vs.) her cevaba zorla sıkıştırma, sadece gerçekten uygunsa kısaca bahset.
+- Doğal ol. Düz ve net öner, süsleme.
+Mevcut Bağlam: ${pageContext ? `Kullanıcı şu an "${pageContext}" sayfasına bakıyor.` : 'Genel sayfada.'}`;
+
+            const model = genAI.getGenerativeModel({
+                model: 'gemini-1.5-flash',
+                systemInstruction: SYSTEM_INSTRUCTION,
+            });
+
+            // Convert to Gemini format
+            const geminiHistory = messages.slice(1).map(m => ({
                 role: m.role === 'user' ? 'user' : 'model',
                 parts: [{ text: m.text }],
             }));
 
-            const res = await fetch('/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    message: userMessage,
-                    context: pageContext,
-                    history,
-                }),
-            });
+            const chat = model.startChat({ history: geminiHistory });
+            const result = await chat.sendMessage(userMessage);
+            const responseText = result.response.text();
 
-            const data = await res.json();
-
-            if (!res.ok || data.error) {
-                throw new Error(data.error || 'Bir hata oluştu');
-            }
-
-            setMessages(prev => [...prev, { role: 'assistant', text: data.reply }]);
+            setMessages(prev => [...prev, { role: 'assistant', text: responseText }]);
         } catch (err: any) {
+            console.error("Gemini Error:", err);
             setMessages(prev => [
                 ...prev,
                 { role: 'assistant', text: '⚠️ Üzgünüm, şu an yanıt veremiyorum. Lütfen tekrar dene.' }
